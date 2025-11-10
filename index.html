@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up / Login System</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Username / Password System</title>
   <style>
     body {
       height: 100vh;
@@ -14,20 +14,17 @@
       font-family: Arial, sans-serif;
       margin: 0;
     }
-
     .container {
       background: white;
       padding: 30px;
       border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
       width: 320px;
       text-align: center;
     }
-
     h2 {
       margin-bottom: 20px;
     }
-
     input {
       width: 90%;
       padding: 10px;
@@ -35,7 +32,6 @@
       border: 1px solid #ccc;
       border-radius: 5px;
     }
-
     button {
       width: 95%;
       padding: 10px;
@@ -47,20 +43,18 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-
     button:hover {
       background-color: #4834d4;
     }
-
     a {
       color: #6c5ce7;
       cursor: pointer;
     }
-
-    #dashboard, #settings, #signupPage, #forgotPage, #resetPage {
+    #dashboard,
+    #settings,
+    #signupPage {
       display: none;
     }
-
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -70,44 +64,26 @@
   </style>
 </head>
 <body>
-
   <!-- LOGIN PAGE -->
   <div class="container" id="loginPage">
     <h2>Login</h2>
     <p style="color: gray;">We don’t ask for your password unless you have an account</p>
-    <input type="email" id="loginEmail" placeholder="Enter email">
-    <input type="password" id="loginPassword" placeholder="Enter password">
+    <input type="text" id="loginUsername" placeholder="Enter username" />
+    <input type="password" id="loginPassword" placeholder="Enter password" />
     <button onclick="login()">Login</button>
-    <p><a onclick="openForgot()">Forgot password?</a></p>
-    <hr>
+    <hr />
     <button onclick="joinAsGuest()">Join as Guest</button>
-    <p>Don’t have an account? <a onclick="openSignup()">Create one</a></p>
+    <p>
+      Don’t have an account? <a onclick="openSignup()">Create one</a>
+    </p>
   </div>
 
   <!-- SIGN UP PAGE -->
   <div class="container" id="signupPage">
     <h2>Create Account</h2>
-    <input type="email" id="signupEmail" placeholder="Enter email">
-    <input type="password" id="signupPassword" placeholder="Create password">
+    <input type="text" id="signupUsername" placeholder="Choose username" />
+    <input type="password" id="signupPassword" placeholder="Create password" />
     <button onclick="signup()">Sign Up</button>
-    <p><a onclick="openLogin()">Back to Login</a></p>
-  </div>
-
-  <!-- FORGOT PASSWORD PAGE -->
-  <div class="container" id="forgotPage">
-    <h2>Forgot Password</h2>
-    <input type="email" id="forgotEmail" placeholder="Enter your email">
-    <button onclick="sendResetCode()">Send 5-digit code</button>
-    <p id="sentCodeText" style="color: gray;"></p>
-    <p><a onclick="openLogin()">Back to Login</a></p>
-  </div>
-
-  <!-- RESET PASSWORD PAGE -->
-  <div class="container" id="resetPage">
-    <h2>Reset Password</h2>
-    <input type="text" id="verifyCode" placeholder="Enter 5-digit code">
-    <input type="password" id="newPassword" placeholder="Enter new password">
-    <button onclick="resetPassword()">Set New Password</button>
     <p><a onclick="openLogin()">Back to Login</a></p>
   </div>
 
@@ -120,7 +96,9 @@
         <button onclick="leaveAccount()">🚪</button>
       </div>
     </div>
-    <p>Your progress (touch count): <span id="touchCount">0</span></p>
+    <p>
+      Your progress (touch count): <span id="touchCount">0</span>
+    </p>
     <button onclick="addTouch()">Tap Me 👆</button>
   </div>
 
@@ -132,41 +110,45 @@
   </div>
 
   <script>
-    let resetEmail = "";
-    let verificationCode = "";
-
-    // Load session on page load
-    window.onload = function() {
+    window.onload = function () {
       const user = localStorage.getItem("userType");
       if (user) showDashboard(user);
+      else openLogin();
     };
 
-    // --- AUTH SYSTEM ---
+    function isValidUsername(name) {
+      return /^[a-zA-Z0-9_]{3,20}$/.test(name);
+    }
 
     function signup() {
-      const email = document.getElementById("signupEmail").value;
+      const username = document.getElementById("signupUsername").value.trim();
       const pass = document.getElementById("signupPassword").value;
-      if (!email || !pass) return alert("Please fill in both fields.");
+      if (!username || !pass) return alert("Please fill in both fields.");
+      if (!isValidUsername(username))
+        return alert(
+          "Username must be 3-20 characters, letters, numbers or underscore only."
+        );
 
       const users = JSON.parse(localStorage.getItem("users") || "{}");
-      if (users[email]) return alert("Account already exists!");
+      if (users[username]) return alert("Username already taken!");
 
-      users[email] = pass;
+      users[username] = pass;
       localStorage.setItem("users", JSON.stringify(users));
       alert("Account created! You can now log in.");
       openLogin();
     }
 
     function login() {
-      const email = document.getElementById("loginEmail").value;
+      const username = document.getElementById("loginUsername").value.trim();
       const pass = document.getElementById("loginPassword").value;
-      const users = JSON.parse(localStorage.getItem("users") || "{}");
+      if (!isValidUsername(username)) return alert("Please enter a valid username.");
 
-      if (!users[email]) return alert("Account not found. Please sign up.");
-      if (users[email] !== pass) return alert("Wrong password!");
+      const users = JSON.parse(localStorage.getItem("users") || "{}");
+      if (!users[username]) return alert("User not found. Please sign up.");
+      if (users[username] !== pass) return alert("Wrong password!");
 
       localStorage.setItem("userType", "email");
-      localStorage.setItem("email", email);
+      localStorage.setItem("username", username);
       if (!localStorage.getItem("touchCount")) localStorage.setItem("touchCount", 0);
       showDashboard("email");
     }
@@ -180,7 +162,9 @@
     function showDashboard(type) {
       hideAll();
       document.getElementById("dashboard").style.display = "block";
-      const name = type === "guest" ? "Guest" : localStorage.getItem("email");
+      let name = "";
+      if (type === "guest") name = "Guest";
+      else name = localStorage.getItem("username");
       document.getElementById("welcome").textContent = "Welcome, " + name;
       document.getElementById("touchCount").textContent = localStorage.getItem("touchCount");
     }
@@ -195,55 +179,36 @@
     function leaveAccount() {
       const type = localStorage.getItem("userType");
       if (type === "guest") {
-        if (!confirm("Leaving will delete your guest account and all saved data. Continue?")) return;
+        if (!confirm("Leaving will delete your guest account and all saved data. Continue?"))
+          return;
       }
       localStorage.removeItem("userType");
-      localStorage.removeItem("email");
+      localStorage.removeItem("username");
+      localStorage.removeItem("touchCount");
       openLogin();
     }
 
-    // --- FORGOT / RESET PASSWORD ---
-    function sendResetCode() {
-      const email = document.getElementById("forgotEmail").value;
-      const users = JSON.parse(localStorage.getItem("users") || "{}");
-      if (!users[email]) return alert("No account found with that email.");
-
-      verificationCode = Math.floor(10000 + Math.random() * 90000).toString();
-      resetEmail = email;
-
-      // Simulation of sending code
-      document.getElementById("sentCodeText").innerHTML = 
-        "Code sent! (demo code: <b>" + verificationCode + "</b>)";
-
-      hideAll();
-      document.getElementById("resetPage").style.display = "block";
-    }
-
-    function resetPassword() {
-      const code = document.getElementById("verifyCode").value;
-      const newPass = document.getElementById("newPassword").value;
-
-      if (code !== verificationCode) return alert("Invalid code!");
-      if (!newPass) return alert("Please enter a new password.");
-
-      const users = JSON.parse(localStorage.getItem("users") || "{}");
-      users[resetEmail] = newPass;
-      localStorage.setItem("users", JSON.stringify(users));
-      alert("Password reset successful! You can now log in.");
-      openLogin();
-    }
-
-    // --- PAGE SWITCHING ---
     function hideAll() {
-      const pages = ["loginPage", "signupPage", "forgotPage", "resetPage", "dashboard", "settings"];
-      pages.forEach(p => document.getElementById(p).style.display = "none");
+      const pages = ["loginPage", "signupPage", "dashboard", "settings"];
+      pages.forEach((p) => (document.getElementById(p).style.display = "none"));
     }
 
-    function openLogin() { hideAll(); document.getElementById("loginPage").style.display = "block"; }
-    function openSignup() { hideAll(); document.getElementById("signupPage").style.display = "block"; }
-    function openForgot() { hideAll(); document.getElementById("forgotPage").style.display = "block"; }
-    function openSettings() { hideAll(); document.getElementById("settings").style.display = "block"; }
-    function closeSettings() { hideAll(); document.getElementById("dashboard").style.display = "block"; }
+    function openLogin() {
+      hideAll();
+      document.getElementById("loginPage").style.display = "block";
+    }
+    function openSignup() {
+      hideAll();
+      document.getElementById("signupPage").style.display = "block";
+    }
+    function openSettings() {
+      hideAll();
+      document.getElementById("settings").style.display = "block";
+    }
+    function closeSettings() {
+      hideAll();
+      document.getElementById("dashboard").style.display = "block";
+    }
   </script>
 </body>
 </html>
