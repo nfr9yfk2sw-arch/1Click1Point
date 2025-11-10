@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Username / Password System</title>
+  <title>Mini Games App</title>
   <style>
     body {
       height: 100vh;
@@ -19,18 +19,21 @@
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      width: 320px;
+      width: 350px;
       text-align: center;
+      max-width: 90vw;
     }
-    h2 {
+    h2, h3 {
       margin-bottom: 20px;
     }
-    input {
+    input[type="text"], input[type="password"], input[type="number"] {
       width: 90%;
       padding: 10px;
       margin: 8px 0;
       border: 1px solid #ccc;
       border-radius: 5px;
+      font-size: 1em;
+      box-sizing: border-box;
     }
     button {
       width: 95%;
@@ -41,7 +44,9 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 1em;
       transition: background 0.3s;
+      box-sizing: border-box;
     }
     button:hover {
       background-color: #4834d4;
@@ -49,10 +54,12 @@
     a {
       color: #6c5ce7;
       cursor: pointer;
+      text-decoration: underline;
+      font-size: 0.9em;
+      display: inline-block;
+      margin-top: 10px;
     }
-    #dashboard,
-    #settings,
-    #signupPage {
+    #dashboard, #settings, #signupPage, #moreGamesPage, #mathDifficultyPage, #mathGamePage {
       display: none;
     }
     .top-bar {
@@ -61,28 +68,33 @@
       align-items: center;
       margin-bottom: 15px;
     }
+    .small-button {
+      width: auto;
+      padding: 6px 12px;
+      margin-left: 5px;
+      font-size: 1.2em;
+    }
   </style>
 </head>
 <body>
+
   <!-- LOGIN PAGE -->
   <div class="container" id="loginPage">
     <h2>Login</h2>
     <p style="color: gray;">We don’t ask for your password unless you have an account</p>
-    <input type="text" id="loginUsername" placeholder="Enter username" />
-    <input type="password" id="loginPassword" placeholder="Enter password" />
+    <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="username" />
+    <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password" />
     <button onclick="login()">Login</button>
     <hr />
     <button onclick="joinAsGuest()">Join as Guest</button>
-    <p>
-      Don’t have an account? <a onclick="openSignup()">Create one</a>
-    </p>
+    <p>Don’t have an account? <a onclick="openSignup()">Create one</a></p>
   </div>
 
   <!-- SIGN UP PAGE -->
   <div class="container" id="signupPage">
     <h2>Create Account</h2>
-    <input type="text" id="signupUsername" placeholder="Choose username" />
-    <input type="password" id="signupPassword" placeholder="Create password" />
+    <input type="text" id="signupUsername" placeholder="Choose username" autocomplete="username" />
+    <input type="password" id="signupPassword" placeholder="Create password" autocomplete="new-password" />
     <button onclick="signup()">Sign Up</button>
     <p><a onclick="openLogin()">Back to Login</a></p>
   </div>
@@ -92,14 +104,17 @@
     <div class="top-bar">
       <h3 id="welcome"></h3>
       <div>
-        <button onclick="openSettings()">⚙️</button>
-        <button onclick="leaveAccount()">🚪</button>
+        <button class="small-button" onclick="openSettings()" title="Settings">⚙️</button>
+        <button class="small-button" onclick="leaveAccount()" title="Leave Account">🚪</button>
       </div>
     </div>
-    <p>
-      Your progress (touch count): <span id="touchCount">0</span>
-    </p>
+
+    <!-- Clicker Game -->
+    <p>Your progress (touch count): <span id="touchCount">0</span></p>
     <button onclick="addTouch()">Tap Me 👆</button>
+
+    <!-- More Games Button -->
+    <button onclick="openMoreGames()" style="margin-top: 20px;">More Games 🎮</button>
   </div>
 
   <!-- SETTINGS PAGE -->
@@ -109,106 +124,254 @@
     <button onclick="closeSettings()">Back</button>
   </div>
 
-  <script>
-    window.onload = function () {
-      const user = localStorage.getItem("userType");
-      if (user) showDashboard(user);
-      else openLogin();
-    };
+  <!-- MORE GAMES MENU -->
+  <div class="container" id="moreGamesPage">
+    <h2>More Games</h2>
+    <button onclick="openMathDifficulty()">Math</button>
+    <br/><br/>
+    <button onclick="backToDashboard()">Back</button>
+  </div>
 
-    function isValidUsername(name) {
-      return /^[a-zA-Z0-9_]{3,20}$/.test(name);
-    }
+  <!-- MATH DIFFICULTY SELECTION -->
+  <div class="container" id="mathDifficultyPage">
+    <h2>Select Math Difficulty</h2>
+    <button onclick="startMathGame('easy')">Easy</button>
+    <button onclick="startMathGame('medium')">Medium</button>
+    <button onclick="startMathGame('hard')">Hard</button>
+    <br/><br/>
+    <button onclick="openMoreGames()">Back</button>
+  </div>
 
-    function signup() {
-      const username = document.getElementById("signupUsername").value.trim();
-      const pass = document.getElementById("signupPassword").value;
-      if (!username || !pass) return alert("Please fill in both fields.");
-      if (!isValidUsername(username))
-        return alert(
-          "Username must be 3-20 characters, letters, numbers or underscore only."
-        );
+  <!-- MATH GAME PAGE -->
+  <div class="container" id="mathGamePage">
+    <h2>Math Game</h2>
+    <div id="mathQuestion" style="font-size:1.5em; margin-bottom: 15px;"></div>
+    <input type="number" id="mathAnswer" placeholder="Your answer" />
+    <br /><br />
+    <button id="submitMathBtn" onclick="submitMathAnswer()">Submit</button>
+    <div id="mathResult" style="margin-top: 15px; font-weight: bold;"></div>
+    <br />
+    <button onclick="backToDashboard()">Quit</button>
+  </div>
 
-      const users = JSON.parse(localStorage.getItem("users") || "{}");
-      if (users[username]) return alert("Username already taken!");
+<script>
+  // User and app data
+  let currentLevel = "easy";
+  let currentQuestionIndex = 0;
+  let score = 0;
 
-      users[username] = pass;
-      localStorage.setItem("users", JSON.stringify(users));
-      alert("Account created! You can now log in.");
+  window.onload = function () {
+    const userType = localStorage.getItem("userType");
+    if (userType) {
+      showDashboard(userType);
+    } else {
       openLogin();
     }
+  };
 
-    function login() {
-      const username = document.getElementById("loginUsername").value.trim();
-      const pass = document.getElementById("loginPassword").value;
-      if (!isValidUsername(username)) return alert("Please enter a valid username.");
+  function isValidUsername(name) {
+    return /^[a-zA-Z0-9_]{3,20}$/.test(name);
+  }
 
-      const users = JSON.parse(localStorage.getItem("users") || "{}");
-      if (!users[username]) return alert("User not found. Please sign up.");
-      if (users[username] !== pass) return alert("Wrong password!");
-
-      localStorage.setItem("userType", "email");
-      localStorage.setItem("username", username);
-      if (!localStorage.getItem("touchCount")) localStorage.setItem("touchCount", 0);
-      showDashboard("email");
+  // SIGN UP
+  function signup() {
+    const username = document.getElementById("signupUsername").value.trim();
+    const pass = document.getElementById("signupPassword").value;
+    if (!username || !pass) {
+      alert("Please fill in both fields.");
+      return;
     }
-
-    function joinAsGuest() {
-      localStorage.setItem("userType", "guest");
-      if (!localStorage.getItem("touchCount")) localStorage.setItem("touchCount", 0);
-      showDashboard("guest");
+    if (!isValidUsername(username)) {
+      alert("Username must be 3-20 characters, letters, numbers or underscore only.");
+      return;
     }
-
-    function showDashboard(type) {
-      hideAll();
-      document.getElementById("dashboard").style.display = "block";
-      let name = "";
-      if (type === "guest") name = "Guest";
-      else name = localStorage.getItem("username");
-      document.getElementById("welcome").textContent = "Welcome, " + name;
-      document.getElementById("touchCount").textContent = localStorage.getItem("touchCount");
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    if (users[username]) {
+      alert("Username already taken!");
+      return;
     }
+    users[username] = pass;
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("Account created! You can now log in.");
+    openLogin();
+  }
 
-    function addTouch() {
-      let count = parseInt(localStorage.getItem("touchCount") || 0);
-      count++;
-      localStorage.setItem("touchCount", count);
-      document.getElementById("touchCount").textContent = count;
+  // LOGIN
+  function login() {
+    const username = document.getElementById("loginUsername").value.trim();
+    const pass = document.getElementById("loginPassword").value;
+    if (!isValidUsername(username)) {
+      alert("Please enter a valid username.");
+      return;
     }
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    if (!users[username]) {
+      alert("User not found. Please sign up.");
+      return;
+    }
+    if (users[username] !== pass) {
+      alert("Wrong password!");
+      return;
+    }
+    localStorage.setItem("userType", "email"); // just for consistency
+    localStorage.setItem("username", username);
+    if (!localStorage.getItem("touchCount")) localStorage.setItem("touchCount", 0);
+    showDashboard("email");
+  }
 
-    function leaveAccount() {
-      const type = localStorage.getItem("userType");
-      if (type === "guest") {
-        if (!confirm("Leaving will delete your guest account and all saved data. Continue?"))
-          return;
+  // GUEST LOGIN
+  function joinAsGuest() {
+    localStorage.setItem("userType", "guest");
+    if (!localStorage.getItem("touchCount")) localStorage.setItem("touchCount", 0);
+    showDashboard("guest");
+  }
+
+  // SHOW DASHBOARD
+  function showDashboard(type) {
+    hideAll();
+    document.getElementById("dashboard").style.display = "block";
+    let name = type === "guest" ? "Guest" : localStorage.getItem("username");
+    document.getElementById("welcome").textContent = "Welcome, " + name;
+    document.getElementById("touchCount").textContent = localStorage.getItem("touchCount") || 0;
+  }
+
+  // CLICKER GAME
+  function addTouch() {
+    let count = parseInt(localStorage.getItem("touchCount") || "0", 10);
+    count++;
+    localStorage.setItem("touchCount", count);
+    document.getElementById("touchCount").textContent = count;
+  }
+
+  // LEAVE ACCOUNT
+  function leaveAccount() {
+    const type = localStorage.getItem("userType");
+    if (type === "guest") {
+      if (!confirm("Leaving will delete your guest account and all saved data. Continue?")) {
+        return;
       }
-      localStorage.removeItem("userType");
-      localStorage.removeItem("username");
-      localStorage.removeItem("touchCount");
-      openLogin();
     }
+    localStorage.removeItem("userType");
+    localStorage.removeItem("username");
+    localStorage.removeItem("touchCount");
+    openLogin();
+  }
 
-    function hideAll() {
-      const pages = ["loginPage", "signupPage", "dashboard", "settings"];
-      pages.forEach((p) => (document.getElementById(p).style.display = "none"));
-    }
+  // PAGE NAVIGATION
+  function hideAll() {
+    const pages = [
+      "loginPage",
+      "signupPage",
+      "dashboard",
+      "settings",
+      "moreGamesPage",
+      "mathDifficultyPage",
+      "mathGamePage",
+    ];
+    pages.forEach((p) => (document.getElementById(p).style.display = "none"));
+  }
+  function openLogin() {
+    hideAll();
+    document.getElementById("loginPage").style.display = "block";
+  }
+  function openSignup() {
+    hideAll();
+    document.getElementById("signupPage").style.display = "block";
+  }
+  function openSettings() {
+    hideAll();
+    document.getElementById("settings").style.display = "block";
+  }
+  function closeSettings() {
+    hideAll();
+    document.getElementById("dashboard").style.display = "block";
+  }
 
-    function openLogin() {
-      hideAll();
-      document.getElementById("loginPage").style.display = "block";
+  // MORE GAMES MENU
+  function openMoreGames() {
+    hideAll();
+    document.getElementById("moreGamesPage").style.display = "block";
+  }
+
+  // MATH DIFFICULTY SELECTION
+  function openMathDifficulty() {
+    hideAll();
+    document.getElementById("mathDifficultyPage").style.display = "block";
+  }
+
+  // BACK TO DASHBOARD (from games)
+  function backToDashboard() {
+    hideAll();
+    document.getElementById("dashboard").style.display = "block";
+    // Reset math game input visibility if changed
+    document.getElementById("mathAnswer").style.display = "inline-block";
+    document.getElementById("submitMathBtn").style.display = "inline-block";
+    document.getElementById("mathResult").textContent = "";
+  }
+
+  // MATH QUESTIONS DATA
+  const mathQuestions = {
+    easy: [
+      { q: "2 + 3", a: 5 },
+      { q: "5 - 1", a: 4 },
+      { q: "3 + 4", a: 7 },
+    ],
+    medium: [
+      { q: "12 ÷ 3", a: 4 },
+      { q: "15 - 7", a: 8 },
+      { q: "8 × 2", a: 16 },
+    ],
+    hard: [
+      { q: "25 × 4", a: 100 },
+      { q: "36 ÷ 6", a: 6 },
+      { q: "49 + 51", a: 100 },
+    ],
+  };
+
+  // START MATH GAME
+  function startMathGame(level) {
+    currentLevel = level;
+    currentQuestionIndex = 0;
+    score = 0;
+    hideAll();
+    document.getElementById("mathGamePage").style.display = "block";
+    loadMathQuestion();
+  }
+
+  // LOAD MATH QUESTION
+  function loadMathQuestion() {
+    const questionObj = mathQuestions[currentLevel][currentQuestionIndex];
+    document.getElementById("mathQuestion").textContent = questionObj.q;
+    document.getElementById("mathAnswer").value = "";
+    document.getElementById("mathResult").textContent = "";
+  }
+
+  // SUBMIT MATH ANSWER
+  function submitMathAnswer() {
+    const userAns = Number(document.getElementById("mathAnswer").value.trim());
+    const correctAns = mathQuestions[currentLevel][currentQuestionIndex].a;
+    if (userAns === correctAns) {
+      score++;
+      document.getElementById("mathResult").textContent = "Correct! 🎉";
+    } else {
+      document.getElementById("mathResult").textContent = "Wrong! The answer was " + correctAns;
     }
-    function openSignup() {
-      hideAll();
-      document.getElementById("signupPage").style.display = "block";
+    currentQuestionIndex++;
+    if (currentQuestionIndex < mathQuestions[currentLevel].length) {
+      setTimeout(loadMathQuestion, 1500);
+    } else {
+      setTimeout(showMathScore, 1500);
     }
-    function openSettings() {
-      hideAll();
-      document.getElementById("settings").style.display = "block";
-    }
-    function closeSettings() {
-      hideAll();
-      document.getElementById("dashboard").style.display = "block";
-    }
-  </script>
+  }
+
+  // SHOW FINAL SCORE
+  function showMathScore() {
+    document.getElementById("mathQuestion").textContent = "Game Over! Your score: " + score;
+    document.getElementById("mathAnswer").style.display = "none";
+    document.getElementById("submitMathBtn").style.display = "none";
+    document.getElementById("mathResult").textContent = "";
+  }
+</script>
+
 </body>
 </html>
