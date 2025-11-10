@@ -8,185 +8,160 @@
     body {
       height: 100vh;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #74b9ff, #a29bfe);
       font-family: Arial, sans-serif;
-      color: white;
-      background: linear-gradient(-45deg, #ff4b1f, #1fddff, #24fe41, #ff0099);
-      background-size: 400% 400%;
-      animation: gradient 10s ease infinite;
       margin: 0;
     }
 
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      width: 320px;
+      text-align: center;
     }
 
-    form, #mainPage {
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 25px;
-      border-radius: 15px;
-      text-align: center;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-      width: 280px;
+    h2 {
+      margin-bottom: 20px;
     }
 
     input {
       width: 90%;
       padding: 10px;
-      margin: 8px 0;
-      border: none;
+      margin: 10px 0;
+      border: 1px solid #ccc;
       border-radius: 5px;
-      text-align: center;
     }
 
     button {
-      padding: 10px 20px;
-      background-color: #00c3ff;
+      width: 95%;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: #6c5ce7;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 5px;
       cursor: pointer;
-      transition: 0.3s;
-      margin-top: 10px;
+      transition: background 0.3s;
     }
 
     button:hover {
-      background-color: #ff0099;
-      transform: scale(1.1);
+      background-color: #4834d4;
     }
 
-    a {
-      color: #00c3ff;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    #mainPage {
+    #dashboard {
       display: none;
+    }
+
+    #settings {
+      display: none;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .warning {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 5px;
     }
   </style>
 </head>
 <body>
 
-  <h1>Welcome!</h1>
-
-  <!-- Sign Up Form -->
-  <form id="signupForm">
-    <h2>Sign Up</h2>
-    <input type="text" id="signupName" placeholder="Your Name" required><br>
-    <input type="email" id="signupEmail" placeholder="Your Email" required><br>
-    <button type="submit">Sign Up</button>
-    <p>Already have an account? <a id="goLogin">Log in</a></p>
-  </form>
-
-  <!-- Login Form -->
-  <form id="loginForm" style="display:none;">
+  <div class="container" id="authPage">
     <h2>Login</h2>
-    <input type="email" id="loginEmail" placeholder="Your Email" required><br>
-    <button type="submit">Login</button>
-    <p>Don’t have an account? <a id="goSignup">Sign up</a></p>
-  </form>
+    <p style="color: gray;">We don’t ask for your password</p>
+    <input type="email" id="email" placeholder="Enter email">
+    <button onclick="login()">Login</button>
+    <button onclick="joinAsGuest()">Join as Guest</button>
+  </div>
 
-  <!-- Main Page -->
-  <div id="mainPage">
-    <h2>Hello, <span id="userName"></span>!</h2>
-    <p>Your number: <span id="clickCount">0</span></p>
-    <button id="clickButton">Click me</button><br><br>
-    <button id="logoutButton">Log out</button>
+  <div class="container" id="dashboard">
+    <div class="top-bar">
+      <h3 id="welcome"></h3>
+      <div>
+        <button onclick="openSettings()">⚙️</button>
+        <button onclick="leaveAccount()">🚪</button>
+      </div>
+    </div>
+    <p>Your progress (touch count): <span id="touchCount">0</span></p>
+    <button onclick="addTouch()">Tap Me 👆</button>
+  </div>
+
+  <div class="container" id="settings">
+    <h3>Settings</h3>
+    <p>You can add your future settings here.</p>
+    <button onclick="closeSettings()">Back</button>
   </div>
 
   <script>
-    const signupForm = document.getElementById("signupForm");
-    const loginForm = document.getElementById("loginForm");
-    const mainPage = document.getElementById("mainPage");
-    const clickButton = document.getElementById("clickButton");
-    const clickCountDisplay = document.getElementById("clickCount");
-    const userNameDisplay = document.getElementById("userName");
-
-    // navigation
-    document.getElementById("goLogin").addEventListener("click", () => {
-      signupForm.style.display = "none";
-      loginForm.style.display = "block";
-    });
-
-    document.getElementById("goSignup").addEventListener("click", () => {
-      loginForm.style.display = "none";
-      signupForm.style.display = "block";
-    });
-
-    // sign up
-    signupForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const name = document.getElementById("signupName").value.trim();
-      const email = document.getElementById("signupEmail").value.trim().toLowerCase();
-
-      if (localStorage.getItem(email)) {
-        alert("That email already has an account! Please log in.");
-        return;
-      }
-
-      const user = { name, clicks: 0 };
-      localStorage.setItem(email, JSON.stringify(user));
-      alert("Account created successfully! You can now log in.");
-      signupForm.reset();
-      signupForm.style.display = "none";
-      loginForm.style.display = "block";
-    });
-
-    // login
-    loginForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value.trim().toLowerCase();
-      const userData = localStorage.getItem(email);
-
-      if (!userData) {
-        alert("No account found with that email. Please sign up first!");
-        return;
-      }
-
-      localStorage.setItem("currentUser", email);
-      const user = JSON.parse(userData);
-      openMainPage(user);
-    });
-
-    // open main page
-    function openMainPage(user) {
-      signupForm.style.display = "none";
-      loginForm.style.display = "none";
-      mainPage.style.display = "block";
-
-      userNameDisplay.textContent = user.name;
-      clickCountDisplay.textContent = user.clicks;
-    }
-
-    // clicking adds count
-    clickButton.addEventListener("click", () => {
-      const email = localStorage.getItem("currentUser");
-      const user = JSON.parse(localStorage.getItem(email));
-      user.clicks++;
-      localStorage.setItem(email, JSON.stringify(user));
-      clickCountDisplay.textContent = user.clicks;
-    });
-
-    // logout
-    document.getElementById("logoutButton").addEventListener("click", () => {
-      localStorage.removeItem("currentUser");
-      mainPage.style.display = "none";
-      signupForm.style.display = "block";
-    });
-
-    // auto login if saved
-    window.onload = () => {
-      const current = localStorage.getItem("currentUser");
-      if (current) {
-        const user = JSON.parse(localStorage.getItem(current));
-        openMainPage(user);
+    // Load saved session
+    window.onload = function() {
+      const user = localStorage.getItem("userType");
+      if (user) {
+        showDashboard(user);
       }
     };
+
+    function login() {
+      const email = document.getElementById("email").value;
+      if (!email) return alert("Please enter your email!");
+
+      localStorage.setItem("userType", "email");
+      localStorage.setItem("email", email);
+      if (!localStorage.getItem("touchCount")) localStorage.setItem("touchCount", 0);
+      showDashboard("email");
+    }
+
+    function joinAsGuest() {
+      localStorage.setItem("userType", "guest");
+      if (!localStorage.getItem("touchCount")) localStorage.setItem("touchCount", 0);
+      showDashboard("guest");
+    }
+
+    function showDashboard(type) {
+      document.getElementById("authPage").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+
+      const name = type === "guest" ? "Guest" : localStorage.getItem("email");
+      document.getElementById("welcome").textContent = "Welcome, " + name;
+      document.getElementById("touchCount").textContent = localStorage.getItem("touchCount");
+    }
+
+    function addTouch() {
+      let count = parseInt(localStorage.getItem("touchCount") || 0);
+      count++;
+      localStorage.setItem("touchCount", count);
+      document.getElementById("touchCount").textContent = count;
+    }
+
+    function leaveAccount() {
+      const type = localStorage.getItem("userType");
+      if (type === "guest") {
+        if (!confirm("Leaving will delete your guest account and all saved data. Continue?")) return;
+      }
+      localStorage.clear();
+      location.reload();
+    }
+
+    function openSettings() {
+      document.getElementById("dashboard").style.display = "none";
+      document.getElementById("settings").style.display = "block";
+    }
+
+    function closeSettings() {
+      document.getElementById("settings").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+    }
   </script>
+
 </body>
 </html>
