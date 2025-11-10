@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up / Login System</title>
+  <style>
+    body {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: linear-gradient(-45deg, #ff4b1f, #1fddff, #24fe41, #ff0099);
+      background-size: 400% 400%;
+      animation: gradient 10s ease infinite;
+      margin: 0;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    form, #mainPage {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      width: 280px;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #00c3ff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #ff0099;
+      transform: scale(1.1);
+    }
+
+    a {
+      color: #00c3ff;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    #mainPage {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Welcome!</h1>
+
+  <!-- Sign Up Form -->
+  <form id="signupForm">
+    <h2>Sign Up</h2>
+    <input type="text" id="signupName" placeholder="Your Name" required><br>
+    <input type="email" id="signupEmail" placeholder="Your Email" required><br>
+    <button type="submit">Sign Up</button>
+    <p>Already have an account? <a id="goLogin">Log in</a></p>
+  </form>
+
+  <!-- Login Form -->
+  <form id="loginForm" style="display:none;">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Your Email" required><br>
+    <button type="submit">Login</button>
+    <p>Don’t have an account? <a id="goSignup">Sign up</a></p>
+  </form>
+
+  <!-- Main Page -->
+  <div id="mainPage">
+    <h2>Hello, <span id="userName"></span>!</h2>
+    <p>Your number: <span id="clickCount">0</span></p>
+    <button id="clickButton">Click me</button><br><br>
+    <button id="logoutButton">Log out</button>
+  </div>
+
+  <script>
+    const signupForm = document.getElementById("signupForm");
+    const loginForm = document.getElementById("loginForm");
+    const mainPage = document.getElementById("mainPage");
+    const clickButton = document.getElementById("clickButton");
+    const clickCountDisplay = document.getElementById("clickCount");
+    const userNameDisplay = document.getElementById("userName");
+
+    // navigation
+    document.getElementById("goLogin").addEventListener("click", () => {
+      signupForm.style.display = "none";
+      loginForm.style.display = "block";
+    });
+
+    document.getElementById("goSignup").addEventListener("click", () => {
+      loginForm.style.display = "none";
+      signupForm.style.display = "block";
+    });
+
+    // sign up
+    signupForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const name = document.getElementById("signupName").value.trim();
+      const email = document.getElementById("signupEmail").value.trim().toLowerCase();
+
+      if (localStorage.getItem(email)) {
+        alert("That email already has an account! Please log in.");
+        return;
+      }
+
+      const user = { name, clicks: 0 };
+      localStorage.setItem(email, JSON.stringify(user));
+      alert("Account created successfully! You can now log in.");
+      signupForm.reset();
+      signupForm.style.display = "none";
+      loginForm.style.display = "block";
+    });
+
+    // login
+    loginForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+      const userData = localStorage.getItem(email);
+
+      if (!userData) {
+        alert("No account found with that email. Please sign up first!");
+        return;
+      }
+
+      localStorage.setItem("currentUser", email);
+      const user = JSON.parse(userData);
+      openMainPage(user);
+    });
+
+    // open main page
+    function openMainPage(user) {
+      signupForm.style.display = "none";
+      loginForm.style.display = "none";
+      mainPage.style.display = "block";
+
+      userNameDisplay.textContent = user.name;
+      clickCountDisplay.textContent = user.clicks;
+    }
+
+    // clicking adds count
+    clickButton.addEventListener("click", () => {
+      const email = localStorage.getItem("currentUser");
+      const user = JSON.parse(localStorage.getItem(email));
+      user.clicks++;
+      localStorage.setItem(email, JSON.stringify(user));
+      clickCountDisplay.textContent = user.clicks;
+    });
+
+    // logout
+    document.getElementById("logoutButton").addEventListener("click", () => {
+      localStorage.removeItem("currentUser");
+      mainPage.style.display = "none";
+      signupForm.style.display = "block";
+    });
+
+    // auto login if saved
+    window.onload = () => {
+      const current = localStorage.getItem("currentUser");
+      if (current) {
+        const user = JSON.parse(localStorage.getItem(current));
+        openMainPage(user);
+      }
+    };
+  </script>
+</body>
+</html>
