@@ -1,377 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mini Games App</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>1Click1Point</title>
   <style>
-    body {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #74b9ff, #a29bfe);
-      font-family: Arial, sans-serif;
-      margin: 0;
+    :root{
+      --bg1:#ff4b1f; --bg2:#1fddff; --accent:#00c3ff;
+      --glass: rgba(0,0,0,0.55);
     }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      width: 350px;
-      text-align: center;
-      max-width: 90vw;
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; font-family:Inter, system-ui, Arial; -webkit-font-smoothing:antialiased;}
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(135deg,var(--bg1),var(--bg2),#24fe41,#ff0099);
+      background-size:400% 400%;
+      animation:grad 12s linear infinite;
+      color:white;
+      padding:20px;
     }
-    h2, h3 {
-      margin-bottom: 20px;
+    @keyframes grad{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
     }
-    input[type="text"], input[type="password"], input[type="number"] {
-      width: 90%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1em;
-      box-sizing: border-box;
+
+    /* container for forms + app */
+    .card{
+      width:100%;
+      max-width:420px;
+      background:var(--glass);
+      border-radius:16px;
+      padding:18px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.4);
+      text-align:center;
     }
-    button {
-      width: 95%;
-      padding: 10px;
-      margin: 8px 0;
-      background-color: #6c5ce7;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1em;
-      transition: background 0.3s;
-      box-sizing: border-box;
+
+    h1{margin:6px 0 12px; font-size:20px}
+    input{
+      width:100%;
+      padding:12px;
+      margin:8px 0;
+      border-radius:10px;
+      border:0;
+      text-align:center;
+      font-size:16px;
     }
-    button:hover {
-      background-color: #4834d4;
+    .small{font-size:13px; opacity:0.9}
+
+    .link{color:var(--accent); text-decoration:underline; cursor:pointer}
+
+    /* MAIN big circular button area */
+    #mainPage { display:none; padding:10px; }
+    .big-area { display:flex; flex-direction:column; gap:18px; align-items:center; justify-content:center; padding:10px 0; }
+    .big-circle {
+      width:210px; height:210px;
+      border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12), rgba(0,0,0,0.25));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      font-size:44px;
+      color:white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 -6px 20px rgba(0,0,0,0.25);
+      user-select:none;
+      -webkit-user-select:none;
+      touch-action: manipulation;
+      transition: transform 120ms ease, box-shadow 120ms ease;
     }
-    a {
-      color: #6c5ce7;
-      cursor: pointer;
-      text-decoration: underline;
-      font-size: 0.9em;
-      display: inline-block;
-      margin-top: 10px;
+
+    /* smaller on very small screens */
+    @media (max-width:360px){
+      .big-circle { width:170px; height:170px; font-size:36px; }
     }
-    #dashboard, #settings, #signupPage, #moreGamesPage, #mathDifficultyPage, #mathGamePage {
-      display: none;
+
+    /* press feedback */
+    .big-circle:active, .big-circle.pressed {
+      transform: scale(1.08);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 6px 12px rgba(255,255,255,0.05);
     }
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
+
+    .btn-row{display:flex; gap:10px; justify-content:center; margin-top:6px}
+    button.smallbtn{
+      padding:8px 14px; border-radius:10px; border:0; background:var(--accent); color:#031016; font-weight:600; cursor:pointer;
     }
-    .small-button {
-      width: auto;
-      padding: 6px 12px;
-      margin-left: 5px;
-      font-size: 1.2em;
-    }
+
+    .meta {opacity:0.95; font-size:14px}
   </style>
 </head>
 <body>
+  <div class="card">
+    <h1>1Click1Point</h1>
 
-  <!-- LOGIN PAGE -->
-  <div class="container" id="loginPage">
-    <h2>Login</h2>
-    <p style="color: gray;">We don’t ask for your password unless you have an account</p>
-    <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="username" />
-    <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="current-password" />
-    <button onclick="login()">Login</button>
-    <hr />
-    <button onclick="joinAsGuest()">Join as Guest</button>
-    <p>Don’t have an account? <a onclick="openSignup()">Create one</a></p>
-  </div>
+    <!-- Sign Up Form -->
+    <form id="signupForm">
+      <h2 class="small">Sign Up</h2>
+      <input id="signupName" type="text" placeholder="Your name" required />
+      <input id="signupEmail" type="email" placeholder="Your email" required />
+      <button class="smallbtn" type="submit">Create account</button>
+      <p class="small">Already have account? <span id="goLogin" class="link">Log in</span></p>
+    </form>
 
-  <!-- SIGN UP PAGE -->
-  <div class="container" id="signupPage">
-    <h2>Create Account</h2>
-    <input type="text" id="signupUsername" placeholder="Choose username" autocomplete="username" />
-    <input type="password" id="signupPassword" placeholder="Create password" autocomplete="new-password" />
-    <button onclick="signup()">Sign Up</button>
-    <p><a onclick="openLogin()">Back to Login</a></p>
-  </div>
+    <!-- Login Form -->
+    <form id="loginForm" style="display:none;">
+      <h2 class="small">Log In</h2>
+      <input id="loginEmail" type="email" placeholder="Your email" required />
+      <button class="smallbtn" type="submit">Log in</button>
+      <p class="small">No account? <span id="goSignup" class="link">Sign up</span></p>
+    </form>
 
-  <!-- DASHBOARD -->
-  <div class="container" id="dashboard">
-    <div class="top-bar">
-      <h3 id="welcome"></h3>
-      <div>
-        <button class="small-button" onclick="openSettings()" title="Settings">⚙️</button>
-        <button class="small-button" onclick="leaveAccount()" title="Leave Account">🚪</button>
+    <!-- Main App Page -->
+    <div id="mainPage">
+      <div class="big-area">
+        <div id="userGreeting" class="meta">Hello <span id="userName">Friend</span></div>
+
+        <!-- big circular touch button -->
+        <div id="bigCircle" class="big-circle" role="button" aria-pressed="false" tabindex="0">
+          <span id="clickCount">0</span>
+        </div>
+
+        <div class="btn-row">
+          <button id="clickButton" class="smallbtn">Click</button>
+          <button id="resetButton" class="smallbtn" style="background:#ff6b6b">Reset</button>
+        </div>
+
+        <div class="meta">Touch the big circle — the number inside is how many touches you made.</div>
+        <div style="margin-top:8px;">
+          <button id="logoutBtn" class="smallbtn" style="background:#9aa0ff">Log out</button>
+        </div>
       </div>
     </div>
-
-    <!-- Clicker Game -->
-    <p>Your progress (touch count): <span id="touchCount">0</span></p>
-    <button onclick="addTouch()">Tap Me 👆</button>
-
-    <!-- More Games Button -->
-    <button onclick="openMoreGames()" style="margin-top: 20px;">More Games 🎮</button>
-  </div>
-
-  <!-- SETTINGS PAGE -->
-  <div class="container" id="settings">
-    <h3>Settings</h3>
-    <p>Future settings go here.</p>
-    <button onclick="closeSettings()">Back</button>
-  </div>
-
-  <!-- MORE GAMES MENU -->
-  <div class="container" id="moreGamesPage">
-    <h2>More Games</h2>
-    <button onclick="openMathDifficulty()">Math</button>
-    <br/><br/>
-    <button onclick="backToDashboard()">Back</button>
-  </div>
-
-  <!-- MATH DIFFICULTY SELECTION -->
-  <div class="container" id="mathDifficultyPage">
-    <h2>Select Math Difficulty</h2>
-    <button onclick="startMathGame('easy')">Easy</button>
-    <button onclick="startMathGame('medium')">Medium</button>
-    <button onclick="startMathGame('hard')">Hard</button>
-    <br/><br/>
-    <button onclick="openMoreGames()">Back</button>
-  </div>
-
-  <!-- MATH GAME PAGE -->
-  <div class="container" id="mathGamePage">
-    <h2>Math Game</h2>
-    <div id="mathQuestion" style="font-size:1.5em; margin-bottom: 15px;"></div>
-    <input type="number" id="mathAnswer" placeholder="Your answer" />
-    <br /><br />
-    <button id="submitMathBtn" onclick="submitMathAnswer()">Submit</button>
-    <div id="mathResult" style="margin-top: 15px; font-weight: bold;"></div>
-    <br />
-    <button onclick="backToDashboard()">Quit</button>
   </div>
 
 <script>
-  // User and app data
-  let currentLevel = "easy";
-  let currentQuestionIndex = 0;
-  let score = 0;
+  // Elements
+  const signupForm = document.getElementById('signupForm');
+  const loginForm = document.getElementById('loginForm');
+  const mainPage = document.getElementById('mainPage');
+  const goLogin = document.getElementById('goLogin');
+  const goSignup = document.getElementById('goSignup');
 
-  window.onload = function () {
-    const userType = localStorage.getItem("userType");
-    if (userType) {
-      showDashboard(userType);
-    } else {
-      openLogin();
+  const signupName = document.getElementById('signupName');
+  const signupEmail = document.getElementById('signupEmail');
+  const loginEmail = document.getElementById('loginEmail');
+
+  const bigCircle = document.getElementById('bigCircle');
+  const clickButton = document.getElementById('clickButton');
+  const resetButton = document.getElementById('resetButton');
+  const clickCountEl = document.getElementById('clickCount');
+  const userNameEl = document.getElementById('userName');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  // helpers
+  function normalizeEmail(e){ return e.trim().toLowerCase(); }
+  function saveUser(email, userObj){ localStorage.setItem(email, JSON.stringify(userObj)); }
+  function loadUser(email){ const d = localStorage.getItem(email); return d ? JSON.parse(d) : null; }
+  function setCurrent(email){ localStorage.setItem('currentUser', email); }
+  function getCurrent(){ return localStorage.getItem('currentUser'); }
+  function clearCurrent(){ localStorage.removeItem('currentUser'); }
+
+  // navigation
+  goLogin.addEventListener('click', ()=>{ signupForm.style.display='none'; loginForm.style.display='block'; });
+  goSignup.addEventListener('click', ()=>{ loginForm.style.display='none'; signupForm.style.display='block'; });
+
+  // Sign up
+  signupForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const name = signupName.value.trim();
+    const email = normalizeEmail(signupEmail.value);
+    if(!name || !email){ alert('fill both fields'); return; }
+    if(localStorage.getItem(email)){ alert('email already used — log in'); signupForm.reset(); goLogin.click(); return; }
+    const user = { name, clicks: 0 };
+    saveUser(email, user);
+    alert('Account created! Log in now.');
+    signupForm.reset();
+    goLogin.click();
+  });
+
+  // Login
+  loginForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const email = normalizeEmail(loginEmail.value);
+    const user = loadUser(email);
+    if(!user){ alert('No account found. Please sign up.'); return; }
+    setCurrent(email);
+    openMain(user);
+    loginForm.reset();
+  });
+
+  // open main
+  function openMain(user){
+    signupForm.style.display='none';
+    loginForm.style.display='none';
+    mainPage.style.display='block';
+    userNameEl.textContent = user.name || 'Friend';
+    clickCountEl.textContent = user.clicks || 0;
+  }
+
+  // click logic shared for both big circle and small button
+  function addClick(){
+    const email = getCurrent();
+    if(!email) return;
+    const user = loadUser(email);
+    user.clicks = (user.clicks || 0) + 1;
+    saveUser(email, user);
+    clickCountEl.textContent = user.clicks;
+  }
+
+  clickButton.addEventListener('click', addClick);
+
+  // big circle touch behavior: support pointer/touch/click with press animation
+  let pressTimeout = null;
+  function pressStart(){
+    bigCircle.classList.add('pressed');
+    bigCircle.setAttribute('aria-pressed','true');
+    // immediate click
+    addClick();
+  }
+  function pressEnd(){
+    bigCircle.classList.remove('pressed');
+    bigCircle.setAttribute('aria-pressed','false');
+    if(pressTimeout){ clearTimeout(pressTimeout); pressTimeout = null; }
+  }
+
+  // pointer events (works for mouse + touch)
+  bigCircle.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    pressStart();
+  });
+  bigCircle.addEventListener('pointerup', pressEnd);
+  bigCircle.addEventListener('pointercancel', pressEnd);
+  bigCircle.addEventListener('pointerleave', pressEnd);
+
+  // keyboard accessibility: space/enter to "press"
+  bigCircle.addEventListener('keydown', e=>{
+    if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); pressStart(); setTimeout(pressEnd, 150); }
+  });
+
+  // reset button (resets count for current user)
+  resetButton.addEventListener('click', ()=>{
+    const email = getCurrent();
+    if(!email) return alert('no user logged in');
+    if(!confirm('Reset your count to 0?')) return;
+    const user = loadUser(email);
+    user.clicks = 0;
+    saveUser(email, user);
+    clickCountEl.textContent = 0;
+  });
+
+  // logout
+  logoutBtn.addEventListener('click', ()=>{
+    clearCurrent();
+    mainPage.style.display='none';
+    signupForm.style.display='block';
+  });
+
+  // auto-login if current user saved
+  window.addEventListener('load', ()=>{
+    const current = getCurrent();
+    if(current){
+      const user = loadUser(current);
+      if(user) openMain(user);
+      else clearCurrent();
     }
-  };
-
-  function isValidUsername(name) {
-    return /^[a-zA-Z0-9_]{3,20}$/.test(name);
-  }
-
-  // SIGN UP
-  function signup() {
-    const username = document.getElementById("signupUsername").value.trim();
-    const pass = document.getElementById("signupPassword").value;
-    if (!username || !pass) {
-      alert("Please fill in both fields.");
-      return;
-    }
-    if (!isValidUsername(username)) {
-      alert("Username must be 3-20 characters, letters, numbers or underscore only.");
-      return;
-    }
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (users[username]) {
-      alert("Username already taken!");
-      return;
-    }
-    users[username] = pass;
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("Account created! You can now log in.");
-    openLogin();
-  }
-
-  // LOGIN
-  function login() {
-    const username = document.getElementById("loginUsername").value.trim();
-    const pass = document.getElementById("loginPassword").value;
-    if (!isValidUsername(username)) {
-      alert("Please enter a valid username.");
-      return;
-    }
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (!users[username]) {
-      alert("User not found. Please sign up.");
-      return;
-    }
-    if (users[username] !== pass) {
-      alert("Wrong password!");
-      return;
-    }
-    localStorage.setItem("userType", "email"); // just for consistency
-    localStorage.setItem("username", username);
-    if (!localStorage.getItem("touchCount")) localStorage.setItem("touchCount", 0);
-    showDashboard("email");
-  }
-
-  // GUEST LOGIN
-  function joinAsGuest() {
-    localStorage.setItem("userType", "guest");
-    if (!localStorage.getItem("touchCount")) localStorage.setItem("touchCount", 0);
-    showDashboard("guest");
-  }
-
-  // SHOW DASHBOARD
-  function showDashboard(type) {
-    hideAll();
-    document.getElementById("dashboard").style.display = "block";
-    let name = type === "guest" ? "Guest" : localStorage.getItem("username");
-    document.getElementById("welcome").textContent = "Welcome, " + name;
-    document.getElementById("touchCount").textContent = localStorage.getItem("touchCount") || 0;
-  }
-
-  // CLICKER GAME
-  function addTouch() {
-    let count = parseInt(localStorage.getItem("touchCount") || "0", 10);
-    count++;
-    localStorage.setItem("touchCount", count);
-    document.getElementById("touchCount").textContent = count;
-  }
-
-  // LEAVE ACCOUNT
-  function leaveAccount() {
-    const type = localStorage.getItem("userType");
-    if (type === "guest") {
-      if (!confirm("Leaving will delete your guest account and all saved data. Continue?")) {
-        return;
-      }
-    }
-    localStorage.removeItem("userType");
-    localStorage.removeItem("username");
-    localStorage.removeItem("touchCount");
-    openLogin();
-  }
-
-  // PAGE NAVIGATION
-  function hideAll() {
-    const pages = [
-      "loginPage",
-      "signupPage",
-      "dashboard",
-      "settings",
-      "moreGamesPage",
-      "mathDifficultyPage",
-      "mathGamePage",
-    ];
-    pages.forEach((p) => (document.getElementById(p).style.display = "none"));
-  }
-  function openLogin() {
-    hideAll();
-    document.getElementById("loginPage").style.display = "block";
-  }
-  function openSignup() {
-    hideAll();
-    document.getElementById("signupPage").style.display = "block";
-  }
-  function openSettings() {
-    hideAll();
-    document.getElementById("settings").style.display = "block";
-  }
-  function closeSettings() {
-    hideAll();
-    document.getElementById("dashboard").style.display = "block";
-  }
-
-  // MORE GAMES MENU
-  function openMoreGames() {
-    hideAll();
-    document.getElementById("moreGamesPage").style.display = "block";
-  }
-
-  // MATH DIFFICULTY SELECTION
-  function openMathDifficulty() {
-    hideAll();
-    document.getElementById("mathDifficultyPage").style.display = "block";
-  }
-
-  // BACK TO DASHBOARD (from games)
-  function backToDashboard() {
-    hideAll();
-    document.getElementById("dashboard").style.display = "block";
-    // Reset math game input visibility if changed
-    document.getElementById("mathAnswer").style.display = "inline-block";
-    document.getElementById("submitMathBtn").style.display = "inline-block";
-    document.getElementById("mathResult").textContent = "";
-  }
-
-  // MATH QUESTIONS DATA
-  const mathQuestions = {
-    easy: [
-      { q: "2 + 3", a: 5 },
-      { q: "5 - 1", a: 4 },
-      { q: "3 + 4", a: 7 },
-    ],
-    medium: [
-      { q: "12 ÷ 3", a: 4 },
-      { q: "15 - 7", a: 8 },
-      { q: "8 × 2", a: 16 },
-    ],
-    hard: [
-      { q: "25 × 4", a: 100 },
-      { q: "36 ÷ 6", a: 6 },
-      { q: "49 + 51", a: 100 },
-    ],
-  };
-
-  // START MATH GAME
-  function startMathGame(level) {
-    currentLevel = level;
-    currentQuestionIndex = 0;
-    score = 0;
-    hideAll();
-    document.getElementById("mathGamePage").style.display = "block";
-    loadMathQuestion();
-  }
-
-  // LOAD MATH QUESTION
-  function loadMathQuestion() {
-    const questionObj = mathQuestions[currentLevel][currentQuestionIndex];
-    document.getElementById("mathQuestion").textContent = questionObj.q;
-    document.getElementById("mathAnswer").value = "";
-    document.getElementById("mathResult").textContent = "";
-  }
-
-  // SUBMIT MATH ANSWER
-  function submitMathAnswer() {
-    const userAns = Number(document.getElementById("mathAnswer").value.trim());
-    const correctAns = mathQuestions[currentLevel][currentQuestionIndex].a;
-    if (userAns === correctAns) {
-      score++;
-      document.getElementById("mathResult").textContent = "Correct! 🎉";
-    } else {
-      document.getElementById("mathResult").textContent = "Wrong! The answer was " + correctAns;
-    }
-    currentQuestionIndex++;
-    if (currentQuestionIndex < mathQuestions[currentLevel].length) {
-      setTimeout(loadMathQuestion, 1500);
-    } else {
-      setTimeout(showMathScore, 1500);
-    }
-  }
-
-  // SHOW FINAL SCORE
-  function showMathScore() {
-    document.getElementById("mathQuestion").textContent = "Game Over! Your score: " + score;
-    document.getElementById("mathAnswer").style.display = "none";
-    document.getElementById("submitMathBtn").style.display = "none";
-    document.getElementById("mathResult").textContent = "";
-  }
+  });
 </script>
-
 </body>
 </html>
